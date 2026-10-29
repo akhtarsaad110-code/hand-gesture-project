@@ -5,84 +5,88 @@ from PIL import Image
 
 # Page Configuration
 st.set_page_config(
-    page_title="Sign Language Classifier",
+    page_title="ASL Gesture Recognition",
     page_icon="🤟",
-    layout="centered"
+    layout="wide"
 )
 
-# Custom Styling (CSS)
+# Professional & Responsive Styling (CSS)
 st.markdown("""
     <style>
-    .main-title {
-        font-size: 38px;
-        font-weight: 700;
+    .main-header {
+        font-size: 42px;
+        font-weight: 800;
         color: #FF4B4B;
         text-align: center;
-        margin-bottom: 5px;
+        margin-bottom: 0px;
     }
-    .sub-title {
+    .sub-header {
         font-size: 18px;
         color: #A0A0A0;
         text-align: center;
         margin-bottom: 30px;
     }
-    .prediction-box {
-        padding: 20px;
-        border-radius: 10px;
-        background-color: #1E1E1E;
-        border: 2px solid #FF4B4B;
-        text-align: center;
-        margin-top: 20px;
+    .stButton>button {
+        width: 100%;
+        background-color: #FF4B4B;
+        color: white;
+        border-radius: 8px;
+        font-weight: bold;
     }
     </style>
 """, unsafe_allow_html=True)
 
 # Header Section
-st.markdown('<div class="main-title">Sign Language Gesture Classifier 🤟</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-title">Deep Learning Based Hand Gesture Recognition System for ASL</div>', unsafe_allow_html=True)
+st.markdown('<p class="main-header">🤟 ASL Sign Language Classifier</p>', unsafe_allow_html=True)
+st.markdown('<p class="sub-header">Production-Grade Deep Learning Hand Gesture Recognition System</p>', unsafe_allow_html=True)
 
 # Load Model
 @st.cache_resource
-def get_model():
+def load_model():
     return tf.keras.models.load_model('gesture_model.h5')
 
-with st.spinner('Model load ho raha hai, bara-e-karam intezar karein...'):
-    model = get_model()
+with st.spinner("Loading AI model... Please wait."):
+    model = load_model()
 
 CLASSES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y']
 
-# Sidebar info
-st.sidebar.title("ℹ️ Project Info")
-st.sidebar.info(
-    "Yeh application Sign Language MNIST dataset par trained custom Convolutional Neural Network (CNN) model ka istemal karti hai "
-    "taaki hand gestures ko accurately classify kiya ja sake."
-)
+# Sidebar Navigation & Info
+with st.sidebar:
+    st.title("📊 Project Dashboard")
+    st.info("This application utilizes a custom Convolutional Neural Network (CNN) trained on the Sign Language MNIST dataset for real-time gesture classification.")
+    st.markdown("---")
+    st.markdown("### 🔤 Supported Classes")
+    st.write(", ".join(CLASSES))
 
-# File Uploader Section
-uploaded_file = st.file_uploader("🖼️ Yahan hand gesture image upload karein...", type=["png", "jpg", "jpeg"])
+# Main Responsive Two-Column Layout
+col1, col2 = st.columns(2, gap="large")
 
-if uploaded_file is not None:
-    col1, col2 = st.columns(2)
+with col1:
+    st.markdown("### 📤 Upload Image")
+    uploaded_file = st.file_uploader("Choose a hand gesture image...", type=["png", "jpg", "jpeg"])
     
-    with col1:
-        st.subheader("Uploaded Image")
-        image = Image.open(uploaded_file).convert('L').resize((28, 28))
-        # Display enlarged preview for better UX
-        st.image(Image.open(uploaded_file), caption='Original Image', use_column_width=True)
-    
-    with col2:
-        st.subheader("Model Prediction")
-        with st.spinner('Predicting...'):
-            img_array = np.array(image) / 255.0
+    if uploaded_file is not None:
+        image = Image.open(uploaded_file)
+        st.image(image, caption="Uploaded Hand Gesture", use_column_width=True)
+
+with col2:
+    st.markdown("### 🔍 Prediction & Analytics")
+    if uploaded_file is not None:
+        with st.spinner("Analyzing image..."):
+            processed_img = image.convert('L').resize((28, 28))
+            img_array = np.array(processed_img) / 255.0
             img_array = img_array.reshape(1, 28, 28, 1)
             
             preds = model.predict(img_array)
             pred_idx = np.argmax(preds[0])
             confidence = float(np.max(preds[0])) * 100
         
-        st.markdown(f"""
-            <div class="prediction-box">
-                <h2 style='color: #4CAF50; margin:0;'>Letter: {CLASSES[pred_idx]}</h2>
-                <p style='font-size: 16px; margin-top: 10px;'>Confidence: <b>{confidence:.2f}%</b></p>
-            </div>
-        """, unsafe_allow_html=True)
+        # Display Results in Professional Cards/Metrics
+        st.success(f"### Predicted Letter: **{CLASSES[pred_idx]}**")
+        st.metric(label="Confidence Score", value=f"{confidence:.2f}%")
+        st.progress(int(confidence))
+        
+        st.markdown("---")
+        st.info("💡 **Tip:** For best results, upload a clear, well-lit hand gesture image.")
+    else:
+        st.info("👈 Please upload an image on the left panel to see model predictions.")
