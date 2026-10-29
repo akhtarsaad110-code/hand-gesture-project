@@ -2,6 +2,8 @@ import streamlit as st
 import numpy as np
 import tensorflow as tf
 from PIL import Image
+import os
+import gdown
 
 # Page Configuration
 st.set_page_config(
@@ -40,12 +42,19 @@ st.markdown("""
 st.markdown('<p class="main-header">🤟 ASL Sign Language Classifier</p>', unsafe_allow_html=True)
 st.markdown('<p class="sub-header">Production-Grade Deep Learning Hand Gesture Recognition System</p>', unsafe_allow_html=True)
 
-# Load Model
+# Load Model from Google Drive automatically if not present
 @st.cache_resource
 def load_model():
-    return tf.keras.models.load_model('gesture_model.h5')
+    model_path = 'gesture_model.h5'
+    if not os.path.exists(model_path):
+        # Google Drive direct download link derived from your shareable link
+        url = 'https://drive.google.com/uc?id=1DMNTngUFwtR5q3XPBGRr5lyG-oKiD6Sd'
+        with st.spinner("Downloading AI model from secure cloud storage... Please wait."):
+            gdown.download(url, model_path, quiet=False)
+            
+    return tf.keras.models.load_model(model_path)
 
-with st.spinner("Loading AI model... Please wait."):
+with st.spinner("Initializing AI model..."):
     model = load_model()
 
 CLASSES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y']
