@@ -5,7 +5,7 @@ from PIL import Image
 
 @st.cache_resource
 def get_model():
-    return tf.keras.models.load_model('model/gesture_model.h5')
+ return tf.keras.models.load_model('gesture_model.h5')
 
 model = get_model()
 CLASSES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y']
